@@ -41,6 +41,7 @@
 #include "nodeset.h"
 #include "nodeitem.h"
 #include "simplugin.h"
+#include "cell.h"
 
 #include <QDebug>
 #include <set>
@@ -514,8 +515,10 @@ double Mesh::DisplaceNodes(void) {
     if (node.DeadP()) continue;
 
     // Attempt to move this cell in a random direction
-    double rx=par.mc_stepsize*(RANDOM()-0.5); // was 100.
-    double ry=par.mc_stepsize*(RANDOM()-0.5);
+//    double rx=par.mc_stepsize*(RANDOM()-0.5); // was 100.
+//    double ry=par.mc_stepsize*(RANDOM()-0.5);
+    double rx = par.mc_stepsize * (RANDOM() - 0.5) * 0.000001; //WORTEL
+    double ry = par.mc_stepsize * (RANDOM() - 0.5) * 1.;	   //WORTEL
 
     // Uniform with a circle of radius par.mc_stepsize
     /* double r = RANDOM() * par.mc_stepsize;
@@ -598,12 +601,41 @@ double Mesh::DisplaceNodes(void) {
 	else 
 	  w2 = 1;
 
+  //WORTEL
+  string const model_choice = par.model_choice;
+  bool const anisotropic2 = (string(par.model_choice).find(":Anisotropic2:") != string::npos);
+
+  if (anisotropic2) //second, improved, version of anisotropic growth
+  {
+    QList<WallBase *> walls = cit->cell->getWalls();
+    for (QList<WallBase *>::const_iterator it = walls.begin(); it != walls.end(); it++)
+    {
+      if ((((*it)->N1()->Index() == cit->nb1->Index()) && ((*it)->N2()->Index() == node.Index())) ||
+        (((*it)->N2()->Index() == cit->nb1->Index()) && ((*it)->N1()->Index() == node.Index())))
+      {
+        w1 *= (*it)->GetWallStrength();
+      }
+      else if ((((*it)->N1()->Index() == cit->nb2->Index()) && ((*it)->N2()->Index() == node.Index())) ||
+           (((*it)->N2()->Index() == cit->nb2->Index()) && ((*it)->N1()->Index() == node.Index())))
+      {
+        w2 *= (*it)->GetWallStrength();
+      }
+    }
+  }
+
 	//if (cit->cell>=0) {
 	if (!cit->cell->BoundaryPolP()) {
 	  double delta_A = 0.5 * ( ( new_p.x - old_p.x ) * (i_min_1.y - i_plus_1.y) +
 				   ( new_p.y - old_p.y ) * ( i_plus_1.x - i_min_1.x ) );
 
-	  area_dh +=  delta_A * (2 * c.target_area - 2 * c.area + delta_A);
+    if (anisotropic2) //second, improved, version of anisotropic growth
+    {
+      area_dh += -1000 * (DSQR(c.target_area / c.area - 1) - DSQR(c.target_area / (c.area - delta_A) - 1)); //WORTEL
+    }
+    else
+    {
+      area_dh += delta_A * (2 * c.target_area - 2 * c.area + delta_A);
+    }
 
 
 	  // cell length constraint

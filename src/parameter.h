@@ -147,6 +147,7 @@ public:
   char * dir2;
   double apoplast_thickness;
   double k_import;
+  char * model_choice;
 private:
 };
 

@@ -78,6 +78,10 @@ class WallBase {
   //  bool aux_source;
 
   bool dead;
+
+  double wall_strength;//WORTEL
+  double wall_strain;//WORTEL
+
   // disallow usage of empty constructor
   WallBase(void) {}
 
@@ -107,6 +111,8 @@ class WallBase {
     viz_flux = src.viz_flux;
     dead = src.dead;
     wall_index = src.wall_index;
+    wall_strength = src.wall_strength;//WORTEL
+    wall_strain= src.wall_strain;//WORTEL
   }
 
   inline int Index(void) const { return wall_index;}
@@ -191,6 +197,23 @@ class WallBase {
   Vector VizFlux(void);
   bool IntersectsWithDivisionPlaneP(const Vector &p1, const Vector &p2);
   void SetTransToNewTrans( void );
+
+  double GetWallStrength() const//WORTEL
+  {
+    return wall_strength;
+  }
+
+  void SetWallStrength(Node* nn1, Node* nn2);//WORTEL
+
+  double GetWallStrain() const//WORTEL
+  {
+    return wall_strain;
+  }
+
+  void SetWallStrain(double wstrain) //WORTEL
+  {
+    wall_strain = wstrain;
+  }
 
  private:
 };

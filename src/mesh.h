@@ -47,17 +47,17 @@ using namespace std;
 // new queue which rejects duplicate elements
 template<class T, class C = deque<T> > class unique_queue : public queue<T,C> {
 
- public:
- typedef typename C::value_type value_type;
- // reimplements push: reject element if it exists already
- void push(const value_type &x) {
-   if (find (queue<T,C>::c.begin(),queue<T,C>::c.end(),x)==queue<T,C>::c.end()) {
-     queue<T,C>::c.push_back(x);
-   }
- }
- void clear(void) {
-   queue<T,C>::c.clear();
- }
+public:
+  typedef typename C::value_type value_type;
+  // reimplements push: reject element if it exists already
+  void push(const value_type &x) {
+    if (find (queue<T,C>::c.begin(),queue<T,C>::c.end(),x)==queue<T,C>::c.end()) {
+      queue<T,C>::c.push_back(x);
+    }
+  }
+  void clear(void) {
+    queue<T,C>::c.clear();
+  }
 };
 
 template<class P> P& deref_ptr ( P *obj) { return *obj; }
@@ -69,7 +69,7 @@ class Mesh {
   friend class Node;
   friend class FigureEditor;
 
- public: 
+public:
   Mesh(void) {
     // Make sure the reserved value is large enough if a cell is added
     // in "Divide" when the capacity is insufficient, "cells" might be
@@ -115,7 +115,7 @@ class Mesh {
   }
 
   inline Node &getNode(int i) {
-    return *nodes[i];    
+    return *nodes[i];
   }
 
   //double Diffusion(void);
@@ -128,16 +128,16 @@ class Mesh {
 
   template<class Op> void LoopCells(Op f) {
     for (vector <Cell *>::iterator i=cells.begin();
-	 i!=cells.end();
-	 i++) {
+         i!=cells.end();
+         i++) {
       f(**i);
     }
   }
 
   template<class Op> void LoopWalls(Op f) {
     for (list <Wall *>::iterator i=walls.begin();
-	 i!=walls.end();
-	 i++) {
+         i!=walls.end();
+         i++) {
       f(**i);
     }
   }
@@ -146,8 +146,8 @@ class Mesh {
   template<class Op> void LoopCurrentCells(Op f) {
     vector<Cell *> current_cells = cells;
     for (vector <Cell *>::iterator i=current_cells.begin();
-	 i!=current_cells.end();
-	 i++) {
+         i!=current_cells.end();
+         i++) {
       f(**i);
 
     }
@@ -155,9 +155,9 @@ class Mesh {
 
   template<class Op> void LoopNodes(Op f) {
     for (vector<Node *>::iterator i=nodes.begin();
-	 i!=nodes.end();
-	 i++) {
-      f(**i); 
+         i!=nodes.end();
+         i++) {
+      f(**i);
     }
   }
 
@@ -167,8 +167,8 @@ class Mesh {
     random_shuffle(shuffled_nodes.begin(),shuffled_nodes.end(),r);
 
     for (vector<Node *>::const_iterator i=shuffled_nodes.begin();
-	 i!=shuffled_nodes.end();
-	 i++) {
+         i!=shuffled_nodes.end();
+         i++) {
       f(*i);
     }
   }
@@ -179,45 +179,45 @@ class Mesh {
     random_shuffle(shuffled_cells.begin(),shuffled_cells.end(),r);
 
     for (vector<Cell *>::const_iterator i=shuffled_cells.begin();
-	 i!=shuffled_cells.end();
-	 i++) {
+         i!=shuffled_cells.end();
+         i++) {
       f(*i);
     }
   }
 
   template<class Op1, class Op2> void LoopCells(Op1 f, Op2 &g) {
     for (vector<Cell *>::iterator i=cells.begin();
-	 i!=cells.end();
-	 i++) {
-      f(**i,g); 
+         i!=cells.end();
+         i++) {
+      f(**i,g);
     }
   }
 
   template<class Op1, class Op2, class Op3> void LoopCells(Op1 f, Op2 &g, Op3 &h) {
     for (vector<Cell *>::iterator i=cells.begin();
-	 i!=cells.end();
-	 i++) {
-      f(**i,g,h); 
+         i!=cells.end();
+         i++) {
+      f(**i,g,h);
     }
   }
 
   void DoCellHouseKeeping(void) {
     vector<Cell *> current_cells = cells;
     for (vector<Cell *>::iterator i = current_cells.begin();
-	 i != current_cells.end();
-	 i ++) {
+         i != current_cells.end();
+         i ++) {
       plugin->CellHouseKeeping(*i);
 
       // Call functions of Cell that cannot be called from CellBase, including Division
       if ((*i)->flag_for_divide) {
-	if ((*i)->division_axis) {
-	  (*i)->DivideOverAxis(*(*i)->division_axis);
-	  delete (*i)->division_axis;
-	  (*i)->division_axis = 0;
-	} else {
-	  (*i)->Divide();
-	}
-	(*i)->flag_for_divide=false;
+        if ((*i)->division_axis) {
+          (*i)->DivideOverAxis(*(*i)->division_axis);
+          delete (*i)->division_axis;
+          (*i)->division_axis = 0;
+        } else {
+          (*i)->Divide();
+        }
+        (*i)->flag_for_divide=false;
       }
     }
   }
@@ -233,29 +233,29 @@ class Mesh {
 
   void BoundingBox(Vector &LowerLeft, Vector &UpperRight);
   int NEqs(void) {     int nwalls = walls.size();
-    int ncells =cells.size();
-    int nchems = Cell::NChem();
+                       int ncells =cells.size();
+                                          int nchems = Cell::NChem();
 
-    // two eqs per chemical for each walls, and one eq per chemical for each cell
-    // This is for generality. For a specific model you may optimize
-    // this by removing superfluous (empty) equations.
-    int neqs = 2 * nwalls * nchems + ncells * nchems;
+                                                             // two eqs per chemical for each walls, and one eq per chemical for each cell
+                                                             // This is for generality. For a specific model you may optimize
+                                                             // this by removing superfluous (empty) equations.
+                                                             int neqs = 2 * nwalls * nchems + ncells * nchems;
 
-    return neqs;
-  }
+                                                                                return neqs;
+                 }
   void IncreaseCellCapacityIfNecessary(void) {
 
     return;
     // cerr << "Entering Mesh::IncreaseCellCapacityIfNecessary \n";
-    // make sure we always have enough space 
+    // make sure we always have enough space
     // to have each cell divide at least once
     //
     // Note that we must do this, because Cell::Divide pushes a new Cell
-    // onto Mesh::cells. As a result, Mesh::cells might be relocated 
+    // onto Mesh::cells. As a result, Mesh::cells might be relocated
     // if we are _within_ a Cell object: i.e. pointer "this" will be changed!!
-    // 
+    //
     // An alternative solution could be to make "Mesh::cells" a list,
-    // but this won't work because we need random access for 
+    // but this won't work because we need random access for
     // the Monte Carlo algorithm.
 
     if (2*cells.size()>cells.capacity()) {
@@ -274,8 +274,8 @@ class Mesh {
   double MeanArea(void) {
     double sum=0.;
     for (vector<Cell *>::const_iterator i=cells.begin();
-	 i!=cells.end();
-	 i++) {
+         i!=cells.end();
+         i++) {
       sum+=(*i)->Area();
     }
     return sum/(double)NCells();
@@ -306,14 +306,14 @@ class Mesh {
 
   }
 
-  void Clear(); 
+  void Clear();
 
   void ReactDiffuse( double delta_t = 1 );
   double SumChemical(int ch);
   void SetChemical(int ch, double value) {
     for (vector<Cell *>::iterator c=cells.begin();
-	 c!=cells.end();
-	 c++) {
+         c!=cells.end();
+         c++) {
       (*c)->chem[ch]=value;
     }
   }
@@ -375,9 +375,9 @@ class Mesh {
   void CleanTransporters(const vector<double> &clean_transporters);
   void RandomizeChemicals(const vector<double> &max_chem, const vector<double> &max_transporters);
   inline double getTime(void) const { return time; }
-  string getTimeHours(void) const; 
+  string getTimeHours(void) const;
   inline void setTime(double t) { time = t; }
-  double CalcProtCellsWalls(int ch) const;  
+  double CalcProtCellsWalls(int ch) const;
   void SettoInitVals(void);
   QVector<qreal> VertexAngles(void);
   QVector< QPair<qreal,int> > VertexAnglesValues(void);
@@ -385,7 +385,7 @@ class Mesh {
     plugin=new_plugin;
   }
   QString ModelID(void) { return plugin?plugin->ModelID():QString("undefined"); }
-  void StandardInit(void);	
+  void StandardInit(void);
   double Compactness(double *res_compactness=0, double *res_area=0, double *res_cell_area=0, double *hull_circumference=0);
   void CSVExportCellData(QTextStream &csv_stream) const;
   void CSVExportWallData(QTextStream &csv_stream) const;
@@ -393,15 +393,15 @@ class Mesh {
   
   Node* findNextBoundaryNode(Node*);
 
- private:
+private:
 
   // Data members
   vector<Cell *> cells;
   vector<Node *> nodes;
   list<Wall *> walls; // we need to erase elements from this container frequently, hence a list.
- public:
+public:
   vector<NodeSet *> node_sets;
- private:
+private:
   vector<Node *> shuffled_nodes;
   vector<Cell *> shuffled_cells;
   unique_queue<Edge> node_insertion_queue;
@@ -431,18 +431,15 @@ class Mesh {
   }
 
   void CircumCircle(double x1,double y1,double x2,double y2,double x3,double y3,
-		    double *xc,double *yc,double *r);
+                    double *xc,double *yc,double *r);
 
 public:
 
   /// Get simulated time in seconds.
-      double                          GetSimTime() const { return m_time; }
+  double                          GetSimTime() const { return time; }
 
-      /// Set the simulated time in seconds.
-      void                            SetSimTime(double time) { m_time = time; }
-
-private:
-   double                  m_time;
+  /// Set the simulated time in seconds.
+  void                            SetSimTime(double time) { setTime(time); }
 
 };
 #endif

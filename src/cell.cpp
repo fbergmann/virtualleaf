@@ -994,6 +994,10 @@ void Cell::DivideWalls(ItList new_node_locations, const Vector from, const Vecto
   m->plugin->OnDivide(&parent_info, daughter, this);
 
   daughter->div_counter=(++div_counter);
+  daughter->div_counter2 = (++div_counter2);//WORTEL
+  daughter->division_time = GetDivisionTime();//WORTEL
+  //	daughter->prev_area = /*GetPrevArea()*/ prev_area / 2;//WORTEL
+  //	daughter->astrain = /*GetAStrain();*/ astrain;//WORTEL
 }
 
 // Move the whole cell

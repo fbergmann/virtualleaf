@@ -40,6 +40,9 @@
 static const std::string _module_id("$Id$");
 
 int WallBase::nwalls=0;
+namespace {
+  const double Pi=3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170676;
+}
 
 ostream &WallBase::print(ostream &os) const {
   os << "{ " << n1->Index() << "->" << n2->Index() 
@@ -86,6 +89,28 @@ WallBase::WallBase(Node *sn1, Node *sn2, CellBase *sc1, CellBase *sc2)
   dead = false;
   wall_type = Normal;
   wall_index = nwalls++;
+
+  SetWallStrength(sn1,sn2);//WORTEL
+    SetWallStrain(0);//WORTEL
+}
+
+
+void WallBase::SetWallStrength(Node* nn1, Node* nn2)//WORTEL
+{
+  Vector ref(1., 0., 0.);
+  Vector tot1(*nn1);
+  Vector tot2(*nn2);
+  Vector tot3 = tot1 - tot2;
+
+  double t2 = tot3.SignedAngle(ref);
+  if ( ( t2 > (-Pi * 3 / 4) && t2 <= (-Pi / 4) ) || ( t2 > (Pi / 4) && t2 <= (Pi * 3 / 4) ) )
+  {
+    wall_strength = 1.;
+  }
+  else
+  {
+    wall_strength = 5.;
+  }
 }
 
 void WallBase::CopyWallContents(const WallBase &src)
@@ -111,6 +136,8 @@ void WallBase::CopyWallContents(const WallBase &src)
   }
   dead = src.dead;
   wall_type = src.wall_type;
+  wall_strength = src.wall_strength;//WORTEL
+  wall_strain = src.wall_strain;//WORTEL
 }
 
 void WallBase::SwapWallContents(WallBase *src)
