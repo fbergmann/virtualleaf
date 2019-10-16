@@ -35,11 +35,10 @@ class Wortel : public QObject, SimPluginInterface {
   Q_INTERFACES(SimPluginInterface)
 
 public:
-  // see SimPluginInterface
-  virtual QString ModelID();
+  Wortel();
 
   // see SimPluginInterface
-  virtual std::string ModelDescriptor();
+  virtual QString ModelID();
 
   // default LeafML file
   virtual QString DefaultLeafML();
@@ -77,6 +76,7 @@ private:
   Mesh*   m_mesh;
   double time_now;
   double time_start;
+  int mModel;
 
   // Calculate rate according to Michaelis Menten kinetics
   double Michaelis(double M1, double J1, double K1, double S1);

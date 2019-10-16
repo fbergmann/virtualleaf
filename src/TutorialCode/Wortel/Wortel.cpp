@@ -32,24 +32,22 @@ static const std::string Wortel_module_id("$Id$");
 using std::string;
 using std::pow;
 
+Wortel::Wortel()
+  : QObject()
+  , mModel(3) // valid values are 1 .. 12
+{
+
+}
+
 QString Wortel::ModelID()
 {
   return QString("Wortel");
 }
 
-
-string Wortel::ModelDescriptor()
-{
-  return string("Wortel: Root model");
-}
-
-
 QString Wortel::DefaultLeafML()
 {
   return QString("Wortel.xml");
 }
-
-
 int Wortel::NChem()
 {
   return 9;
@@ -148,7 +146,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
 
   // MODEL 12 (CF. TABLE S1 FOR PARAMETERS)
 
-  if ( c->CellType() != 0 && ( c->Chemical(3) / c->Area() ) >= 0.7 )
+  if ( mModel == 12 &&  c->CellType() != 0 && ( c->Chemical(3) / c->Area() ) >= 0.7 )
   {
     if ( ( c->Chemical(2) / c->Area() ) < 0.1 )
     {
@@ -166,7 +164,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
 
   // LINEAR GROWTH WITH COUNTER: MODEL 1 (CF. TABLE S1 FOR PARAMETERS)
 
-  if ( c->CellType() != 0 )
+  if (mModel == 1 &&  c->CellType() != 0 )
   {
     time_now = m_mesh->GetSimTime();
 
@@ -187,7 +185,8 @@ void Wortel::CellHouseKeeping(CellBase* c)
 
   // EXPONENTIAL GROWTH WITH TIMER: MODEL 2,4 (CF. TABLE S1 FOR PARAMETERS)
 
-  if ( c->CellType() != 0 )
+  if ((mModel == 1 || mModel == 4) &&
+      c->CellType() != 0 )
   {
     time_now = m_mesh->GetSimTime();
 
@@ -208,7 +207,8 @@ void Wortel::CellHouseKeeping(CellBase* c)
 
   // EXPONENTIAL GROWTH WITH COUNTER: MODEL 3,5,6,7 (CF. TABLE S1 FOR PARAMETERS)
 
-  if ( c->CellType() != 0 )
+  if ((mModel == 3 || mModel == 5 || mModel == 6 || mModel == 7) &&
+      c->CellType() != 0 )
   {
     time_now = m_mesh->GetSimTime();
 
@@ -229,6 +229,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
 
   // RULER + SIZER(CELL CYCLE): MODEL 8,9 (CF. TABLE S1 FOR PARAMETERS)
 
+  if (mModel == 8 || mModel == 9)
   {
     time_now = m_mesh->GetSimTime();
     double CCnoise2 = 1 /*+ (RANDOM()-0.5)/5*/;
@@ -250,6 +251,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   }
 
   // MODEL 10 (CF. TABLE S1 FOR PARAMETERS)
+  if (mModel == 10)
 
   {
     time_now = m_mesh->GetSimTime();
@@ -290,6 +292,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   }
 
   // MODEL 11 (CF. TABLE S1 FOR PARAMETERS)
+  if (mModel == 11)
 
   {
     time_now = m_mesh->GetSimTime();
@@ -341,6 +344,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
 
 
   //  MODEL 12 (CF. TABLE S1 FOR PARAMETERS)
+  if (mModel == 12)
 
   {
     double CCnoise2 = 1 + (RANDOM()-0.5)/5;
@@ -365,6 +369,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
 
 
   // COUNTER+TIMER(CELL CYCLE): MODELS 1, 3, 5 (CF. TABLE S1 FOR PARAMETERS)
+  if (mModel == 1 || mModel == 3 || mModel == 5)
 
   {
     time_now = m_mesh->GetSimTime();
@@ -416,6 +421,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   }
 
   // TIMER + TIMER (CELL CYCLE): MODELS 2, 4 (CF. TABLE S1 FOR PARAMETERS)
+  if (mModel == 2 || mModel == 4)
   {
     time_now = m_mesh->GetSimTime();
     double CCnoise = 1 + (RANDOM()-0.5)/2;
@@ -464,6 +470,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   }
 
   // COUNTER + SIZER(CELL CYCLE): MODELS 6,7 (CF. TABLE S1 FOR PARAMETERS)
+  if (mModel == 6 || mModel == 7)
   {
     time_now = m_mesh->GetSimTime();
     double CCnoise = 1 + (RANDOM()-0.5)/2;
@@ -542,7 +549,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   }
 
   // RULER + SIZER(CELL CYCLE): MODEL 8 (CF. TABLE S1 FOR PARAMETERS)
-
+  if (mModel == 8)
   {
     time_now = m_mesh->GetSimTime();
     double CCnoise2 = 1 + (RANDOM()-0.5)/5;
@@ -565,6 +572,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   }
 
   // RULER + SIZER(CELL CYCLE): MODEL 9 (CF. TABLE S1 FOR PARAMETERS)
+  if (mModel == 9)
 
   {
     time_now = m_mesh->GetSimTime();
@@ -581,7 +589,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   }
 
   // MODEL 10, 11 (CF. TABLE S1 FOR PARAMETERS)
-
+  if (mModel == 10 || mModel == 11)
   {
     time_now = m_mesh->GetSimTime();
 
@@ -789,6 +797,7 @@ void Wortel::CellDynamics(CellBase* c, double* dchem)
 
 
   ////auxin and cytokinin dynamics (MODEL 12)
+  if (mModel != 12) return;
 
   double kmauxCK = 100.;
   if (c->Index() >= 2 && c->Index() <= 9 )
