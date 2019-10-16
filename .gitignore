@@ -1,0 +1,12 @@
+/bin/*.dll
+/bin/*.exe
+/bin/models
+
+*.user
+*.bak
+*.a
+
+.vscode
+.vs
+
+build*
