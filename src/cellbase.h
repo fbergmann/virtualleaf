@@ -119,6 +119,7 @@ class CellBase :  public QObject, public Vector
 
   // set chem 1 to conc in all membranes of this cell
   void SetTransporters(int chem, double conc);
+
   void UnfixNodes(void);
   void FixNodes(void);
   void UnsetSource(void) {
@@ -447,6 +448,55 @@ class CellBase :  public QObject, public Vector
 
   bool marked;
   int div_counter;
+
+
+public:
+  void SetDivCounter2( int dc2 ) { div_counter2 = dc2; } //WORTEL
+
+  int GetDivCounter2() { return div_counter2; } //WORTEL
+
+  void SetCellCycleTime( double cctime ) { cell_cycle_time = cctime; } //WORTEL
+
+  double GetCellCycleTime() { return cell_cycle_time; } //WORTEL
+
+  void SetDivisionTime( double dvtime ) { division_time = dvtime; } //WORTEL
+
+  double GetDivisionTime() { return division_time; } //WORTEL
+
+  double GetAStrain() { return astrain; } //WORTEL
+
+  void SetAStrain( double arealstrain ) { astrain = arealstrain; } //WORTEL
+
+  double GetPrevArea() { return prev_area; } //WORTEL
+
+  void SetPrevArea( double previousarea ) { prev_area = previousarea; } //WORTEL
+
+  bool HasNeighborOfTypeZero()//WORTEL
+  {
+    int prod = 1;
+    for (std::list<Wall*>::const_iterator w = walls.begin(); w != walls.end(); w++)
+        {
+          prod *= ( (*w)->c1 != this ? ( (*w)->c1->cell_type ) : ( (*w)->c2->cell_type ) );
+        }
+    return ( prod == 0 );
+  }
+
+  void SetTransporters(int ch);//overloaded method added for WORTEL
+
+  void SetTransporters(int ch, double conc, double lat);//overloaded method added for WORTEL
+
+  int NumberOfDivisions2() { return div_counter2; }//DDV
+
+protected:
+
+  int 			div_counter2;//DDV
+  double 			cell_cycle_time;//WORTEL
+  double			division_time;//WORTEL
+
+  double			astrain;//WORTEL
+  double			prev_area;//WORTEL
+
+
 };
 
 ostream &operator<<(ostream &os, const CellBase &v);

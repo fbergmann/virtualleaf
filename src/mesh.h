@@ -432,6 +432,18 @@ class Mesh {
 
   void CircumCircle(double x1,double y1,double x2,double y2,double x3,double y3,
 		    double *xc,double *yc,double *r);
+
+public:
+
+  /// Get simulated time in seconds.
+      double                          GetSimTime() const { return m_time; }
+
+      /// Set the simulated time in seconds.
+      void                            SetSimTime(double time) { m_time = time; }
+
+private:
+   double                  m_time;
+
 };
 #endif
 

@@ -330,6 +330,8 @@ void Parameter::Read(const char *filename) {
   rho0 = fgetpar(fp, "rho0", 0., true);
   rho1 = fgetpar(fp, "rho1", 0., true);
   c0 = fgetpar(fp, "c0", 0., true);
+  apoplast_thickness= fgetpar(fp, "apoplast_thickness", 0., true);
+  k_import = fgetpar(fp, "k_import ", 0., true);
   gamma = fgetpar(fp, "gamma", 0., true);
   eps = fgetpar(fp, "eps", 0., true);
   k = dgetparlist(fp, "k", 15, true);

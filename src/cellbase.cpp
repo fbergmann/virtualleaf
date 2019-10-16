@@ -54,6 +54,11 @@ extern Parameter par;
 
 const char* CellBase::boundary_type_names[4] = {"None", "NoFlux", "SourceSink", "SAM"};
 
+namespace {
+  const double Pi=3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170676;
+}
+
+
 #ifndef VLEAFPLUGIN
 CellsStaticDatamembers *CellBase::static_data_members = new CellsStaticDatamembers();
 #else
@@ -548,6 +553,7 @@ void CellBase::ConstructNeighborList(void)
   } while(1);
 }
 
+
 // Save the cell to a stream so we can reconstruct its state later
 void CellBase::Dump(ostream &os) const
 {
@@ -650,3 +656,829 @@ double CellBase::ExactCircumference(void) const
 } 
 
 /* finis*/
+
+
+
+void CellBase::SetTransporters(int ch) //WORTEL
+{
+  if (ch >= NChem())
+  {
+    stringstream error;
+    error << "SetChemical: value ch = " << ch << " is out of range\n";
+    throw error.str().c_str();
+  }
+
+  for (list<Wall *>::iterator w = walls.begin(); w != walls.end(); w++)
+  {
+
+    Vector ref(1., 0., 0.);
+    Vector wa = Vector(*(*w)->N2()) - Vector(*(*w)->N1());
+    double t2 = wa.SignedAngle(ref);
+
+    if (this->cell_type == 1)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 1.);
+        (*w)->setTransporters2(ch, 0.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+    }
+    else if (this->cell_type == 2)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 1.);
+        (*w)->setTransporters2(ch, 0.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4))/*t1 > 0.8*/)
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+    }
+    else if (this->cell_type == 3)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        if (this->HasNeighborOfTypeZero())
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+    }
+    else if (this->cell_type == 4)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        if (this->HasNeighborOfTypeZero())
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+    }
+
+    else if (this->cell_type == 5)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        if (this->HasNeighborOfTypeZero())
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+    }
+    else if (this->cell_type == 6)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        if (this->HasNeighborOfTypeZero())
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+    }
+    else if (this->cell_type == 7)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        if (this->HasNeighborOfTypeZero())
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+      }
+    }
+    else if (this->cell_type == 8)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 1.);
+        (*w)->setTransporters2(ch, 0.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+      }
+    }
+    else if (this->cell_type == 9)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 1.);
+        (*w)->setTransporters2(ch, 0.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+      }
+    }
+  }
+}
+
+void CellBase::SetTransporters(int ch, double conc, double lat)
+{
+  if (ch >= NChem())
+  {
+    stringstream error;
+    error << "SetChemical: value ch = " << ch << " is out of range\n";
+    throw error.str().c_str();
+  }
+
+  for (list<Wall *>::iterator w = walls.begin(); w != walls.end(); w++)
+  {
+    Vector ref(1., 0., 0.);
+    Vector wa = Vector(*(*w)->N2()) - Vector(*(*w)->N1());
+    Vector ref2(0., 1., 0.);
+    double t2 = wa.SignedAngle(ref);
+
+    if (this->cell_type == 1)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 1.);
+        (*w)->setTransporters2(ch, 0.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, lat);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, lat);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+    }
+    else if (this->cell_type == 2)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 1.);
+        (*w)->setTransporters2(ch, 0.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, lat);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, lat);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, lat);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, lat);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+    }
+    else if (this->cell_type == 3)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        if (this->HasNeighborOfTypeZero())
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, lat);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, lat);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, lat);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, lat);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+    }
+    else if (this->cell_type == 4)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        if (this->HasNeighborOfTypeZero())
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, lat);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, lat);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+    }
+    else if (this->cell_type == 5)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        if (this->HasNeighborOfTypeZero())
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+    }
+    else if (this->cell_type == 6)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        if (this->HasNeighborOfTypeZero())
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, lat);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, lat);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+    }
+    else if (this->cell_type == 7)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        if (this->HasNeighborOfTypeZero())
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 1.);
+        }
+        else
+        {
+          (*w)->setTransporters1(ch, 1.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, lat);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, lat);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, lat);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, lat);
+        }
+      }
+    }
+    else if (this->cell_type == 8)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 1.);
+        (*w)->setTransporters2(ch, 0.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, lat);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, lat);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, lat);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, lat);
+        }
+      }
+    }
+    else if (this->cell_type == 9)
+    {
+      if ((t2 > (-Pi / 4)) && (t2 <= (Pi / 4)))
+      { //UPPER WALL
+        (*w)->setTransporters1(ch, 1.);
+        (*w)->setTransporters2(ch, 0.);
+      }
+      else if ((t2 <= (-Pi * 3 / 4)) || (t2 > (Pi * 3 / 4)))
+      { //LOWER WALL
+        (*w)->setTransporters1(ch, 0.);
+        (*w)->setTransporters2(ch, 1.);
+      }
+
+      else if ((t2 > (-Pi * 3 / 4)) && (t2 <= (-Pi / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //LEFT WALL WRT C1
+          (*w)->setTransporters1(ch, lat);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //RIGHT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+      }
+      else if ((t2 > (Pi / 4)) && (t2 <= (Pi * 3 / 4)))
+      {
+        if ((*w)->C1() == this)
+        { //RIGHT WALL WRT C1
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, 0.);
+        }
+        else
+        { //LEFT WALL WRT C2
+          (*w)->setTransporters1(ch, 0.);
+          (*w)->setTransporters2(ch, lat);
+        }
+      }
+    }
+  }
+}
+
