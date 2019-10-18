@@ -71,6 +71,7 @@ class SimPluginInterface {
   // For internal use; not to be redefined by end users
   virtual void SetParameters(Parameter *pass_pars);// { par = pass_pars; }
   virtual void SetCellsStaticDatamembers (CellsStaticDatamembers *cells_static_data_members_of_main);
+  virtual void SetMesh(Mesh* m);
 
  protected:
   class Parameter *par;

@@ -35,6 +35,11 @@ void SimPluginInterface::SetCellsStaticDatamembers( CellsStaticDatamembers *cell
   CellBase::static_data_members = cells_static_data_members_of_main;
 }
 
+void SimPluginInterface::SetMesh(Mesh*)
+{
+
+}
+
 QString SimPluginInterface::DefaultLeafML(void) { return QString(); }
 
 /* finis */
