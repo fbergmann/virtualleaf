@@ -34,6 +34,9 @@ using std::pow;
 
 Wortel::Wortel()
   : QObject()
+  , m_mesh(NULL)
+  , time_now(0)
+  , time_start(0)
   , mModel(3) // valid values are 1 .. 12
 {
 
