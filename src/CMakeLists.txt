@@ -90,6 +90,13 @@ add_executable(VirtualLeaf ${EXECUTABLE_FLAGS} ${CPP_FILES}
   ${VLEAF_CPP_FILES}
 )
 
+set_target_properties(VirtualLeaf
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
 QT_BIND_TO_TARGET(VirtualLeaf)
 
 target_link_libraries(VirtualLeaf ${EXTRA_LIBS} ${LIBXML2_LIBRARIES} ${ZLIB_LIBRARIES})
@@ -140,6 +147,12 @@ add_library(vleaf ${VLEAF_API} ${H_FILES} ${API_HEADERS_MOC})
 target_link_libraries(vleaf ${LIBXML2_LIBRARIES} ${ZLIB_LIBRARIES})
 QT_BIND_TO_TARGET(vleaf)
 
+set_target_properties(vleaf
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
 
 SET(DIRS)
 

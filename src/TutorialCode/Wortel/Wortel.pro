@@ -63,6 +63,6 @@ win32 {
 # finish
 
 DISTFILES += \
-    Wortel(1).xml \
-    Wortel(2).xml \
-    Wortel(3).xml
+    Wortel_1.xml \
+    Wortel_2.xml \
+    Wortel_3.xml
