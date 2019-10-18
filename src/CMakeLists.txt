@@ -191,4 +191,4 @@ endif()
 include(InstallRequiredSystemLibraries)
 
 
-add_subdirectory(TutorialCode/Wortel)
+add_subdirectory(TutorialCode)
