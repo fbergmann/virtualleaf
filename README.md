@@ -1,6 +1,20 @@
 ## Virtual Leaf
 This is a fork from <https://github.com/litsol/virtualleaf> to integrate the root example code from supplement s1 of De Vos et al. (reference 2 below). 
 
+## Build instructions
+The original Qmake  files are still present and you are free to use them. I added a CMake build system, that allows the project to be compiled with all systems supporting it. I've used Ninja and Visual Studio 2016.
+
+Simply configure like so: 
+
+		mkdir build
+		cd build
+		cmake -G Ninja  -DLIBXML2_LIBRARY=<path to>\libxml2.lib -DLIBXML2_INCLUDE_DIR=<path to>\include -DZLIB_LIBRARY=<path to>\zdll.lib -DZLIB_INCLUDE_DIR=<path to>\include\ -DQT_QMAKE_EXECUTABLE=<path to>\bin\qmake.exe -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_BUILD_TYPE=Release ..
+
+and compile running `ninja` and `ninja install`. Now you should be able to run 
+
+		cd ../install/bin
+		VirtualLeaf
+
 
 
 ## References
