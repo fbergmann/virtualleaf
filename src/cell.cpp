@@ -713,7 +713,10 @@ void Cell::DivideWalls(ItList new_node_locations, const Vector from, const Vecto
       do {
         // Find wall between this cell and neighbor cell
         w = find_if(start_search, walls.end(), bind2nd(mem_fun(&Wall::is_wall_of_cell_p), neighbor_cell));
-        start_search = w; start_search++; // continue searching at next element
+        start_search = w;
+        if (w == walls.end()) // can't iterate past end
+          break;
+        start_search++; // continue searching at next element
       } while (w != walls.end() && !(*w)->IntersectsWithDivisionPlaneP(from, to)); // go on until we find the right one.
 
       if (w == walls.end()) {

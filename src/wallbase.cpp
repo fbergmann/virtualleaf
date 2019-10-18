@@ -206,7 +206,8 @@ void WallBase::SetLength(void)
   // Locate first and second nodes of the edge in Cell's list of nodes
   list<Node *>::const_iterator first_node_edge = find(c1->nodes.begin(), c1->nodes.end(), n1);
   list<Node*>::const_iterator second_node_edge = find(c1->nodes.begin(), c1->nodes.end(), n2);  
-  list<Node*>::const_iterator second_node_edge_plus_1 = second_node_edge == c1->nodes.end() ? c1->nodes.end() : ++second_node_edge; // can't iterate past end
+  list<Node*>::const_iterator second_node_edge_plus_1 = 
+    second_node_edge == c1->nodes.end() ? c1->nodes.end() : ++second_node_edge; // can't iterate past end
 
   // wrap around
   if (second_node_edge_plus_1 == c1->nodes.end()) {
@@ -219,18 +220,23 @@ void WallBase::SetLength(void)
   // Now, walk to the second node of the edge in the list of nodes
   stringstream deb_str;
 
-  for (list<Node *>::const_iterator n=
-	 (++first_node_edge==c1->nodes.end()?c1->nodes.begin():first_node_edge);
-       n!=second_node_edge_plus_1;
-       (++n == c1->nodes.end()) ? (n=c1->nodes.begin()):n  ) {
-
-    list<Node *>::const_iterator prev_n = n; 
-    if (prev_n==c1->nodes.begin()) prev_n=c1->nodes.end();
+  for (list<Node*>::const_iterator n =
+    (first_node_edge == c1->nodes.end() ? c1->nodes.end() : (++first_node_edge == c1->nodes.end() ? c1->nodes.begin() : first_node_edge));
+    n != second_node_edge_plus_1;
+    (++n == c1->nodes.end() ? (n = c1->nodes.begin()) : n)) 
+  {
+    list<Node*>::const_iterator prev_n = n;
+    if (prev_n == c1->nodes.begin())
+      prev_n = c1->nodes.end();      
+  
     --prev_n;
 
     //cerr << "Node: " << (Vector)(**n) << endl;
 
     // Note that Node derives from a Vector, so we can do vector calculus as defined in vector.h 
+
+    if (n == c1->nodes.end())
+      n = c1->nodes.begin();
 
     deb_str << "[ " << (*prev_n)->index << " to " << (*n)->index << "]";
     length += (*(*prev_n) - *(*n)).Norm(); 
