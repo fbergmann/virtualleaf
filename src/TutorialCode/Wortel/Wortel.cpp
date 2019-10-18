@@ -37,7 +37,7 @@ Wortel::Wortel()
   , m_mesh(NULL)
   , time_now(0)
   , time_start(0)
-  , mModel(3) // valid values are 1 .. 12
+  , mModel(1) // valid values are 1 .. 12
 {
 
 }
@@ -49,7 +49,11 @@ QString Wortel::ModelID()
 
 QString Wortel::DefaultLeafML()
 {
-  return QString("Wortel.xml");
+  if (mModel == 9)
+    return QString("Wortel_2.xml");
+  if (mModel == 12)
+    return QString("Wortel_3.xml");
+  return QString("Wortel_1.xml");
 }
 int Wortel::NChem()
 {
@@ -102,8 +106,8 @@ void Wortel::OnDivide(ParentInfo* parent_info, CellBase* daughter1, CellBase* da
   daughter1->SetPrevArea(fabs(area1));
   daughter2->SetPrevArea(fabs(area2));
 
-  daughter1->SetCellCycleTime( m_mesh->GetSimTime() ); //Records simulation time upon division
-  daughter2->SetCellCycleTime( m_mesh->GetSimTime() ); //id.
+  daughter1->SetCellCycleTime( m_mesh->getTime() ); //Records simulation time upon division
+  daughter2->SetCellCycleTime( m_mesh->getTime() ); //id.
 
 }
 
@@ -169,7 +173,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
 
   if (mModel == 1 &&  c->CellType() != 0 )
   {
-    time_now = m_mesh->GetSimTime();
+    time_now = m_mesh->getTime();
 
     if ( (((c->CellType()) >= 3) && ((c->CellType()) <= 7)) && (c->HasNeighborOfTypeZero() || ( ( c->NumberOfDivisions2() <= 2 ) && ( time_now - c->GetDivisionTime() ) >= 0)) )
     {
@@ -191,7 +195,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   if ((mModel == 1 || mModel == 4) &&
       c->CellType() != 0 )
   {
-    time_now = m_mesh->GetSimTime();
+    time_now = m_mesh->getTime();
 
     if ( (((c->CellType()) >= 3) && ((c->CellType()) <= 7)) && (c->HasNeighborOfTypeZero() || ( ( time_now - c->GetDivisionTime() ) <= 3240. && ( time_now - c->GetDivisionTime() ) >= 0)) )
     {
@@ -213,7 +217,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   if ((mModel == 3 || mModel == 5 || mModel == 6 || mModel == 7) &&
       c->CellType() != 0 )
   {
-    time_now = m_mesh->GetSimTime();
+    time_now = m_mesh->getTime();
 
     if ( (((c->CellType()) >= 3) && ((c->CellType()) <= 7)) && (c->HasNeighborOfTypeZero() || ( ( c->NumberOfDivisions2() <= 3 ) && ( time_now - c->GetDivisionTime() ) >= 0)) )
     {
@@ -234,7 +238,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
 
   if (mModel == 8 || mModel == 9)
   {
-    time_now = m_mesh->GetSimTime();
+    time_now = m_mesh->getTime();
     double CCnoise2 = 1 /*+ (RANDOM()-0.5)/5*/;
 
     if ( ( tip_position - (c->Centroid().y) ) < /*180.*/240.)
@@ -257,7 +261,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   if (mModel == 10)
 
   {
-    time_now = m_mesh->GetSimTime();
+    time_now = m_mesh->getTime();
 
     if (time_now <= 4320)
     {
@@ -298,7 +302,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   if (mModel == 11)
 
   {
-    time_now = m_mesh->GetSimTime();
+    time_now = m_mesh->getTime();
 
     if (time_now <= 4320)
     {
@@ -375,7 +379,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   if (mModel == 1 || mModel == 3 || mModel == 5)
 
   {
-    time_now = m_mesh->GetSimTime();
+    time_now = m_mesh->getTime();
     double CCnoise = 1 + (RANDOM()-0.5)/2;//to add noise at the start
     double CCnoise2 = 1 + (RANDOM()-0.5)/5;
 
@@ -388,7 +392,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
     if (( c->Index() >= 108 && c->Index() <= 119) && (c->NumberOfDivisions() == 2 ) && ( time_now - c->GetCellCycleTime() ) >= ( 1080. * CCnoise) )
     {
       c->SetDivCounter2( 0 );
-      c->SetDivisionTime( m_mesh->GetSimTime() );
+      c->SetDivisionTime( m_mesh->getTime() );
       c->DivideOverAxis(Vector(1,0,0));
     }
 
@@ -399,7 +403,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
         if ( c->HasNeighborOfTypeZero() )
         {
           c->SetDivCounter2( 0 );
-          c->SetDivisionTime( m_mesh->GetSimTime() );
+          c->SetDivisionTime( m_mesh->getTime() );
           c->DivideOverAxis(Vector(1,0,0));
         }
         else if ( ( time_now - c->GetDivisionTime() ) >= 0 && ( c->NumberOfDivisions2() <= 2 ) )
@@ -412,7 +416,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
         if ( c->HasNeighborOfTypeZero() )
         {
           c->SetDivCounter2( 0 );
-          c->SetDivisionTime( m_mesh->GetSimTime() );
+          c->SetDivisionTime( m_mesh->getTime() );
           c->DivideOverAxis(Vector(1,0,0));
         }
         else if ( time_now - c->GetDivisionTime() >= 0 && ( c->NumberOfDivisions2() <= 2) )
@@ -426,7 +430,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   // TIMER + TIMER (CELL CYCLE): MODELS 2, 4 (CF. TABLE S1 FOR PARAMETERS)
   if (mModel == 2 || mModel == 4)
   {
-    time_now = m_mesh->GetSimTime();
+    time_now = m_mesh->getTime();
     double CCnoise = 1 + (RANDOM()-0.5)/2;
     double CCnoise2 = 1 + (RANDOM()-0.5)/5;//to add noise overall
 
@@ -439,7 +443,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
     if (( c->Index() >= 108 && c->Index() <= 119) && (c->NumberOfDivisions() == 2 ) && ( time_now - c->GetCellCycleTime() ) >= ( 1080. * CCnoise) )
     {
       c->SetDivCounter2( 0 );
-      c->SetDivisionTime( m_mesh->GetSimTime() );
+      c->SetDivisionTime( m_mesh->getTime() );
       c->DivideOverAxis(Vector(1,0,0));
     }
 
@@ -449,7 +453,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
       {
         if ( c->HasNeighborOfTypeZero() )
         {
-          c->SetDivisionTime( m_mesh->GetSimTime() );
+          c->SetDivisionTime( m_mesh->getTime() );
           c->DivideOverAxis(Vector(1,0,0));
         }
         else if ( ( time_now - ( c->GetDivisionTime() ) ) >= 0 && ( ( time_now - c->GetDivisionTime() ) ) <= 3240 )
@@ -461,7 +465,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
       {
         if ( c->HasNeighborOfTypeZero() )
         {
-          c->SetDivisionTime( m_mesh->GetSimTime() );
+          c->SetDivisionTime( m_mesh->getTime() );
           c->DivideOverAxis(Vector(1,0,0));
         }
         else if ( (time_now - c->GetDivisionTime() >= 0) && ( time_now - c->GetDivisionTime() ) <= 3240 )
@@ -475,7 +479,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   // COUNTER + SIZER(CELL CYCLE): MODELS 6,7 (CF. TABLE S1 FOR PARAMETERS)
   if (mModel == 6 || mModel == 7)
   {
-    time_now = m_mesh->GetSimTime();
+    time_now = m_mesh->getTime();
     double CCnoise = 1 + (RANDOM()-0.5)/2;
     double CCnoise2 = 1 + (RANDOM()-0.5)/5;
 
@@ -490,19 +494,19 @@ void Wortel::CellHouseKeeping(CellBase* c)
       if ( c->CellType() > 3 && c->CellType() < 7 && c->Area() >= 96. * CCnoise)
       {
         c->SetDivCounter2( 0 );
-        c->SetDivisionTime( m_mesh->GetSimTime() );
+        c->SetDivisionTime( m_mesh->getTime() );
         c->DivideOverAxis(Vector(1,0,0));
       }
       else if ( ( c->CellType() < 3 || c->CellType() > 7 ) && c->Area() >= 160. * CCnoise)
       {
         c->SetDivCounter2( 0 );
-        c->SetDivisionTime( m_mesh->GetSimTime() );
+        c->SetDivisionTime( m_mesh->getTime() );
         c->DivideOverAxis(Vector(1,0,0));
       }
       else if ( ( c->CellType() == 3 || c->CellType() == 7 ) && c->Area() >= 80. * CCnoise)
       {
         c->SetDivCounter2( 0 );
-        c->SetDivisionTime( m_mesh->GetSimTime() );
+        c->SetDivisionTime( m_mesh->getTime() );
         c->DivideOverAxis(Vector(1,0,0));
       }
     }
@@ -514,7 +518,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
         if ( c->HasNeighborOfTypeZero() )
         {
           c->SetDivCounter2( 0 );
-          c->SetDivisionTime( m_mesh->GetSimTime() );
+          c->SetDivisionTime( m_mesh->getTime() );
           c->DivideOverAxis(Vector(1,0,0));
         }
         else if ( ( time_now - c->GetDivisionTime() ) >= 0 && ( c->NumberOfDivisions2() <= 3 ) )
@@ -527,7 +531,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
         if ( c->HasNeighborOfTypeZero() )
         {
           c->SetDivCounter2( 0 );
-          c->SetDivisionTime( m_mesh->GetSimTime() );
+          c->SetDivisionTime( m_mesh->getTime() );
           c->DivideOverAxis(Vector(1,0,0));
         }
         else if ( time_now - c->GetDivisionTime() >= 0 && ( c->NumberOfDivisions2() <= 3) )
@@ -540,7 +544,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
         if ( c->HasNeighborOfTypeZero() )
         {
           c->SetDivCounter2( 0 );
-          c->SetDivisionTime( m_mesh->GetSimTime() );
+          c->SetDivisionTime( m_mesh->getTime() );
           c->DivideOverAxis(Vector(1,0,0));
         }
         else if ( time_now - c->GetDivisionTime() >= 0 && ( c->NumberOfDivisions2() <= 3) )
@@ -554,7 +558,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   // RULER + SIZER(CELL CYCLE): MODEL 8 (CF. TABLE S1 FOR PARAMETERS)
   if (mModel == 8)
   {
-    time_now = m_mesh->GetSimTime();
+    time_now = m_mesh->getTime();
     double CCnoise2 = 1 + (RANDOM()-0.5)/5;
 
     if ( ( tip_position - (c->Centroid().y) ) < 180.)
@@ -578,7 +582,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   if (mModel == 9)
 
   {
-    time_now = m_mesh->GetSimTime();
+    time_now = m_mesh->getTime();
     double CCnoise2 = 1 + (RANDOM()-0.5)/5;
 
     if ( ( tip_position - (c->Centroid().y) ) < 240.)
@@ -594,7 +598,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
   // MODEL 10, 11 (CF. TABLE S1 FOR PARAMETERS)
   if (mModel == 10 || mModel == 11)
   {
-    time_now = m_mesh->GetSimTime();
+    time_now = m_mesh->getTime();
 
     if (time_now <= 4320)
     {
@@ -612,19 +616,19 @@ void Wortel::CellHouseKeeping(CellBase* c)
         if ( c->CellType() > 3 && c->CellType() < 7 && c->Area() >= 96. * CCnoise)
         {
           c->SetDivCounter2( 0 );
-          c->SetDivisionTime( m_mesh->GetSimTime() );
+          c->SetDivisionTime( m_mesh->getTime() );
           c->DivideOverAxis(Vector(1,0,0));
         }
         else if ( ( c->CellType() < 3 || c->CellType() > 7 ) && c->Area() >= 160. * CCnoise)
         {
           c->SetDivCounter2( 0 );
-          c->SetDivisionTime( m_mesh->GetSimTime() );
+          c->SetDivisionTime( m_mesh->getTime() );
           c->DivideOverAxis(Vector(1,0,0));
         }
         else if ( ( c->CellType() == 3 || c->CellType() == 7 ) && c->Area() >= 80. * CCnoise)
         {
           c->SetDivCounter2( 0 );
-          c->SetDivisionTime( m_mesh->GetSimTime() );
+          c->SetDivisionTime( m_mesh->getTime() );
           c->DivideOverAxis(Vector(1,0,0));
         }
       }
@@ -636,7 +640,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
           if ( c->HasNeighborOfTypeZero() )
           {
             c->SetDivCounter2( 0 );
-            c->SetDivisionTime( m_mesh->GetSimTime() );
+            c->SetDivisionTime( m_mesh->getTime() );
             c->DivideOverAxis(Vector(1,0,0));
           }
           else if ( ( time_now - c->GetDivisionTime() ) >= 0 && ( c->NumberOfDivisions2() <= 2) )
@@ -649,7 +653,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
           if ( c->HasNeighborOfTypeZero() )
           {
             c->SetDivCounter2( 0 );
-            c->SetDivisionTime( m_mesh->GetSimTime() );
+            c->SetDivisionTime( m_mesh->getTime() );
             c->DivideOverAxis(Vector(1,0,0));
           }
           else if ( time_now - c->GetDivisionTime() >= 0 && ( c->NumberOfDivisions2() <= 2) )
@@ -662,7 +666,7 @@ void Wortel::CellHouseKeeping(CellBase* c)
           if ( c->HasNeighborOfTypeZero() )
           {
             c->SetDivCounter2( 0 );
-            c->SetDivisionTime( m_mesh->GetSimTime() );
+            c->SetDivisionTime( m_mesh->getTime() );
             c->DivideOverAxis(Vector(1,0,0));
           }
           else if ( time_now - c->GetDivisionTime() >= 0 && ( c->NumberOfDivisions2() <= 2) )
