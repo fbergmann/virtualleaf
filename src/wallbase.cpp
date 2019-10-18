@@ -205,7 +205,8 @@ void WallBase::SetLength(void)
 
   // Locate first and second nodes of the edge in Cell's list of nodes
   list<Node *>::const_iterator first_node_edge = find(c1->nodes.begin(), c1->nodes.end(), n1);
-  list<Node *>::const_iterator second_node_edge_plus_1 = ++find(c1->nodes.begin(), c1->nodes.end(), n2);
+  list<Node*>::const_iterator second_node_edge = find(c1->nodes.begin(), c1->nodes.end(), n2);  
+  list<Node*>::const_iterator second_node_edge_plus_1 = second_node_edge == c1->nodes.end() ? c1->nodes.end() : ++second_node_edge; // can't iterate past end
 
   // wrap around
   if (second_node_edge_plus_1 == c1->nodes.end()) {

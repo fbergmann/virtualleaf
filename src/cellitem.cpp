@@ -25,19 +25,19 @@
 
 static const std::string _module_id("$Id$");
 
-CellItem::CellItem( Cell *c, QGraphicsScene *canvas )
-  : QGraphicsPolygonItem( 0, canvas ), SimItemBase( c, canvas){
+CellItem::CellItem(Cell* c, QGraphicsScene* canvas)
+  : QGraphicsPolygonItem(0, canvas), SimItemBase(c, canvas) {
 }
 
 void CellItem::userMove(double dx, double dy)
 {
-  QGraphicsPolygonItem::moveBy( dx, dy );
+  QGraphicsPolygonItem::moveBy(dx, dy);
 
   // also move the cell itself
-  class_cast<Cell *>(obj)->x += (dx/Cell::Magnification());
-  class_cast<Cell *>(obj)->y += (dy/Cell::Magnification());
+  class_cast<Cell*>(obj)->x += (dx / Cell::Magnification());
+  class_cast<Cell*>(obj)->y += (dy / Cell::Magnification());
 
-  class_cast<Cell*>(obj)->Move( (dx/Cell::Magnification()), (dy/Cell::Magnification()) );
+  class_cast<Cell*>(obj)->Move((dx / Cell::Magnification()), (dy / Cell::Magnification()));
 }
 
 QPainterPath CellItem::shape() const { return QGraphicsPolygonItem::shape(); }

@@ -383,6 +383,7 @@ public:
   QVector< QPair<qreal,int> > VertexAnglesValues(void);
   void SetSimPlugin(SimPluginInterface *new_plugin) {
     plugin=new_plugin;
+    plugin->SetMesh(this);
   }
   QString ModelID(void) { return plugin?plugin->ModelID():QString("undefined"); }
   void StandardInit(void);

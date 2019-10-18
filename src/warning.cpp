@@ -33,32 +33,32 @@
 
 static const std::string _module_id("$Id$");
 
-int Quiet=0;
+int Quiet = 0;
 
 /*
  * ERROR: scream and die quickly.
  */
 
 #ifndef QTGRAPHICS
-void MyWarning::error(char * fmt, ...)
+void MyWarning::error(char* fmt, ...)
 {
   va_list ap;
 
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);		/* invoke interface to printf       */
-  fprintf(stderr,"\n");     /* automatic \n by Roeland */
+  fprintf(stderr, "\n");     /* automatic \n by Roeland */
   fflush(stderr);			/* drain std error buffer 	    */
   va_end(ap);
   exit(1);				/* quit with error status	    */
 }
 #else
-//#include <qmessagebox.h>
+ //#include <qmessagebox.h>
 #include "UniqueMessage.h"
-void MyWarning::error(const char *fmt, ...)
+void MyWarning::error(const char* fmt, ...)
 {
   va_list ap;
   if (Quiet) return;
-  char *message = new char[1000];
+  char* message = new char[1000];
 
   va_start(ap, fmt);
   vsnprintf(message, 999, fmt, ap);		/* invoke interface to printf       */
@@ -66,17 +66,18 @@ void MyWarning::error(const char *fmt, ...)
 
   QString qmess(message);
 
-  if (qApp->type()==QApplication::Tty) {
+  if (qApp->type() == QApplication::Tty) {
     // batch mode: print the message to stderr
-    fprintf(stderr, "Fatal error: %s\n",qmess.toStdString().c_str());
+    fprintf(stderr, "Fatal error: %s\n", qmess.toStdString().c_str());
     exit(1);
-  } else { // issue a dialog box
-    /* Solve this with signal and slot...! */
-    //extern MainBase *main_window;
-    //((Main *)main_window)->stopSimulation();
+  }
+  else { // issue a dialog box
+ /* Solve this with signal and slot...! */
+ //extern MainBase *main_window;
+ //((Main *)main_window)->stopSimulation();
 
-    QMessageBox::critical( 0 , "Fatal error", qmess, QMessageBox::Abort, QMessageBox::NoButton, QMessageBox::NoButton );
-    fprintf(stderr, "Error: %s\n",qmess.toStdString().c_str());
+    QMessageBox::critical(0, "Fatal error", qmess, QMessageBox::Abort, QMessageBox::NoButton, QMessageBox::NoButton);
+    fprintf(stderr, "Error: %s\n", qmess.toStdString().c_str());
     QCoreApplication::exit(1);
     std::exit(1);
   }
@@ -92,14 +93,14 @@ void MyWarning::error(const char *fmt, ...)
  */
 
 #ifndef QTGRAPHICS
-void MyWarning::warning(const char * fmt, ...)
+void MyWarning::warning(const char* fmt, ...)
 {
   va_list ap;
   if (Quiet) return;
 
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);		/* invoke interface to printf       */
-  fprintf(stderr,"\n");     /* automatic \n by Roeland */
+  fprintf(stderr, "\n");     /* automatic \n by Roeland */
   fflush(stderr);			/* drain std error buffer 	    */
   va_end(ap);
 }
@@ -108,11 +109,11 @@ void MyWarning::warning(const char * fmt, ...)
 #include <qmessagebox.h>
 
 
-void MyWarning::warning(const char *fmt, ...)
+void MyWarning::warning(const char* fmt, ...)
 {
   va_list ap;
   if (Quiet) return;
-  char *message = new char[1000];
+  char* message = new char[1000];
 
   va_start(ap, fmt);
   vsnprintf(message, 999, fmt, ap);		/* invoke interface to printf       */
@@ -122,11 +123,12 @@ void MyWarning::warning(const char *fmt, ...)
 
   //  bool batch = false;
 
-  if (qApp->type()==QApplication::Tty) {
+  if (qApp->type() == QApplication::Tty) {
     // batch mode: print the message to stderr
-    fprintf(stderr, "Warning: %s\n",qmess.toStdString().c_str());
-  } else { // issue a dialog box
-    UniqueMessageBox msgBox( QString("Warning"), qmess );
+    fprintf(stderr, "Warning: %s\n", qmess.toStdString().c_str());
+  }
+  else { // issue a dialog box
+    UniqueMessageBox msgBox(QString("Warning"), qmess);
     msgBox.exec();
   }
   delete[] message;
@@ -135,11 +137,11 @@ void MyWarning::warning(const char *fmt, ...)
 
 /*! Issues a warning only once,
   by comparing it to a list of warnings issued previously. */
-void MyWarning::unique_warning(const char *fmt, ...) {
+void MyWarning::unique_warning(const char* fmt, ...) {
 
   va_list ap;
   if (Quiet) return;
-  char *message = new char[1000];
+  char* message = new char[1000];
 
   va_start(ap, fmt);
   vsnprintf(message, 999, fmt, ap);		/* invoke interface to printf       */
@@ -149,9 +151,9 @@ void MyWarning::unique_warning(const char *fmt, ...) {
 
   // search warning in list
   if (find(
-	   previous_warnings.begin(),previous_warnings.end(), 
-	   string(message)) 
-      ==previous_warnings.end()) {
+    previous_warnings.begin(), previous_warnings.end(),
+    string(message))
+    == previous_warnings.end()) {
 
     // new warning, store in list
     previous_warnings.push_back(string(message));
@@ -159,7 +161,8 @@ void MyWarning::unique_warning(const char *fmt, ...) {
     // issue warning
     warning("%s", message);
 
-  } else {
+  }
+  else {
     // don't issue warning
     return;
   }
@@ -168,7 +171,7 @@ void MyWarning::unique_warning(const char *fmt, ...) {
 
 #ifdef TESTBED
 
-main(int argc, char * argv[])
+main(int argc, char* argv[])
 {
   eprintf("warning: foo=%f\tbar=%d\tfum=\"%s\"\n", 3.1415, 32768, "waldo");
   error("error: foo=%f\tbar=%d\tfum=\"%s\"\n", 3.1415, 32768, "waldo");

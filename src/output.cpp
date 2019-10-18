@@ -40,80 +40,82 @@ using namespace MyWarning;
 
 #define FNAMESIZE 100
 
-int OpenFileAndCheckExistance(FILE **fp,const char *fname,char *ftype) {
+int OpenFileAndCheckExistance(FILE** fp, const char* fname, char* ftype) {
 
-  *fp=fopen(fname,ftype);
-  if (*fp==NULL) 
+  *fp = fopen(fname, ftype);
+  if (*fp == NULL)
     return FALSE;
 
-  if (!strncmp(ftype,"a",1)) {
-    if (ftell(*fp)>0L) return TRUE;
+  if (!strncmp(ftype, "a", 1)) {
+    if (ftell(*fp) > 0L) return TRUE;
     else return FALSE;
-  } else return TRUE;
+  }
+  else return TRUE;
 }
 
-int FileExistsP(const char *fname) {
+int FileExistsP(const char* fname) {
 
-  FILE *fp;
-  fp=fopen(fname,"r");
-  if (fp==NULL)
+  FILE* fp;
+  fp = fopen(fname, "r");
+  if (fp == NULL)
     return FALSE;
 
   fclose(fp);
   return TRUE;
 }
 
-int YesNoP(const char *message) {
+int YesNoP(const char* message) {
 
   char answer[100];
 
-  fprintf(stderr,"%s (y/n) ",message);
+  fprintf(stderr, "%s (y/n) ", message);
   fflush(stderr);
 
-  scanf("%s",answer);
-  while (strcmp(answer,"y") && strcmp(answer,"n")) {
-    fprintf(stderr,"\n\bPlease answer 'y' or 'n'. ");
+  scanf("%s", answer);
+  while (strcmp(answer, "y") && strcmp(answer, "n")) {
+    fprintf(stderr, "\n\bPlease answer 'y' or 'n'. ");
     fflush(stderr);
-    scanf("%s",answer);
+    scanf("%s", answer);
   }
 
-  if (!strcmp(answer,"y")) return TRUE;
+  if (!strcmp(answer, "y")) return TRUE;
 
   return FALSE;
 }
 
 
-FILE *OpenWriteFile(const char *filename) 
+FILE* OpenWriteFile(const char* filename)
 {
   char fname[FNAMESIZE];
 
-  FILE *fp;
+  FILE* fp;
 
-  fprintf(stderr,"Opening %s for writing\n",filename);
+  fprintf(stderr, "Opening %s for writing\n", filename);
 
-  if(FileExistsP(filename)==TRUE) {
+  if (FileExistsP(filename) == TRUE) {
 
     if (false/*par.interactive*/) {
-      char *message=(char *)malloc(2000*sizeof(char));
+      char* message = (char*)malloc(2000 * sizeof(char));
       if (!YesNoP("File exists, overwrite?")) {
-	sprintf(message," Could not open file %s for writing, exiting... \n"
-		,filename);
-	//exit(0);
-	throw(message);
+        sprintf(message, " Could not open file %s for writing, exiting... \n"
+          , filename);
+        //exit(0);
+        throw(message);
       }
-    } else {
+    }
+    else {
       /* Rename old file */
-      sprintf(fname, "%s~",filename);
+      sprintf(fname, "%s~", filename);
       rename(filename, fname);
     }
   }
 
-  strncpy(fname, filename, FNAMESIZE-1);
+  strncpy(fname, filename, FNAMESIZE - 1);
 
-  if ((fp=fopen(fname,"w"))==NULL) {
-    char *message=(char *)malloc(2000*sizeof(char));
-    sprintf(message," Could not open file %s for writing: "
-	    ,fname);
+  if ((fp = fopen(fname, "w")) == NULL) {
+    char* message = (char*)malloc(2000 * sizeof(char));
+    sprintf(message, " Could not open file %s for writing: "
+      , fname);
     perror("");
     throw(message);
   }
@@ -121,93 +123,93 @@ FILE *OpenWriteFile(const char *filename)
 }
 
 
-FILE *OpenReadFile(const char *filename) 
+FILE* OpenReadFile(const char* filename)
 {
-  FILE *fp;
+  FILE* fp;
 
-  fprintf(stderr,"Opening %s for reading\n",filename);
+  fprintf(stderr, "Opening %s for reading\n", filename);
 
-  if((OpenFileAndCheckExistance(&fp,filename,"r"))==FALSE) {	
-    char *message=(char *)malloc(2000*sizeof(char));
-    sprintf(message," File %s not found or empty, exiting... \n" ,filename);
+  if ((OpenFileAndCheckExistance(&fp, filename, "r")) == FALSE) {
+    char* message = (char*)malloc(2000 * sizeof(char));
+    sprintf(message, " File %s not found or empty, exiting... \n", filename);
     throw(message);
   }
   return fp;
 }
 
 
-char *ReadLine(FILE *fp) 
+char* ReadLine(FILE* fp)
 {
   /* does almost the same as fgetln(), but DEC Unix doesn't understand
      fgetln(). Also I want my function to return a real C string,
      terminated by a \0. */
 
-  /* The function reads a line from file *fp, and returns a pointer to the
-     line read, which can be freed with a normal free(). The length of the
-     string is written in *len */
+     /* The function reads a line from file *fp, and returns a pointer to the
+        line read, which can be freed with a normal free(). The length of the
+        string is written in *len */
 
 #define INITIAL_BUFSIZE 100
 
-  char *tmpstring;
+  char* tmpstring;
   int character;
   long bufsize;
-  char *line;
+  char* line;
   int pos;
 
   CheckFile(fp);
 
   /* first allocate a string with a standard length */
-  bufsize=INITIAL_BUFSIZE;
-  MEMORYCHECK(tmpstring=(char *)malloc(bufsize*sizeof(char)));
+  bufsize = INITIAL_BUFSIZE;
+  MEMORYCHECK(tmpstring = (char*)malloc(bufsize * sizeof(char)));
 
-  pos=0;
+  pos = 0;
 
-  while ((character=getc(fp))!=EOF && /* read a character and check */
-	 character!='\n') {
+  while ((character = getc(fp)) != EOF && /* read a character and check */
+    character != '\n') {
 
-    tmpstring[pos]=(char)character;
+    tmpstring[pos] = (char)character;
     (pos)++;
 
     if (pos >= bufsize) {
       /* line is longer than initial_bufsize, reallocate space */
-      bufsize+=INITIAL_BUFSIZE;
-      MEMORYCHECK(tmpstring=(char *)realloc(tmpstring,bufsize*sizeof(char)));
+      bufsize += INITIAL_BUFSIZE;
+      MEMORYCHECK(tmpstring = (char*)realloc(tmpstring, bufsize * sizeof(char)));
     }
   }
 
-  if (character==EOF) {
+  if (character == EOF) {
 
-    if (pos==0) {
+    if (pos == 0) {
       /* EOF was reached, while no characters were read */
       free(tmpstring);
       return NULL;
     }
     if (ferror(fp)) {
-      error("I/O error in ReadLine(%ld): %s\n",fp, strerror(errno));
+      error("I/O error in ReadLine(%ld): %s\n", fp, strerror(errno));
     }
   }
 
   /* Allocate enough memory for the line */
-  MEMORYCHECK(line=(char *)malloc((++(pos))*sizeof(char)));
+  MEMORYCHECK(line = (char*)malloc((++(pos)) * sizeof(char)));
 
-  strncpy(line,tmpstring,(pos)-1);
+  strncpy(line, tmpstring, (pos)-1);
   free(tmpstring);
 
-  line[pos-1]='\0';
+  line[pos - 1] = '\0';
   return line;
 }
 
 
-void CheckFile(FILE *fp) 
+void CheckFile(FILE* fp)
 {
-  if (ftell(fp)<0) {
+  if (ftell(fp) < 0) {
     /* file is probably not open, or another error occured */
-    error("File error (fp=%ld): %d %s\n",fp,errno,strerror(errno));
+    error("File error (fp=%ld): %d %s\n", fp, errno, strerror(errno));
   }
   /* File pointer is ok */
 }
 
-char *Chext(char *filename) {
+char* Chext(char* filename) {
 
   /* Chop the extension from a filename */
 
@@ -219,27 +221,28 @@ char *Chext(char *filename) {
   /* not yet tested */
 
   int i;
-  char *result;
+  char* result;
 
-  for (i=strlen(filename)-1;i>=0;i--) {
-    if (filename[i]=='.') 
+  for (i = strlen(filename) - 1; i >= 0; i--) {
+    if (filename[i] == '.')
       break;
   }
 
   /* No . found */
-  if (i==0) {
+  if (i == 0) {
 
-    result=strdup(filename);
-  } else {
+    result = strdup(filename);
+  }
+  else {
 
     /* . found */
-    result=(char *)malloc((i+1)*sizeof(char));
+    result = (char*)malloc((i + 1) * sizeof(char));
     strncpy(result, filename, i);
   }
   return result;
 }
 
-void MakeDir(const char *dirname) {
+void MakeDir(const char* dirname) {
 
 #ifdef QTGRAPHICS
   QFileInfo file_info(dirname);
@@ -251,8 +254,9 @@ void MakeDir(const char *dirname) {
       // OK 
       cerr << "Using existing directory " << dirname << " for data storage." << endl;
       return;
-    } else {
-      char *message = new char[MESS_BUF_SIZE+1];
+    }
+    else {
+      char* message = new char[MESS_BUF_SIZE + 1];
       snprintf(message, MESS_BUF_SIZE, "%s is not a directory", dirname);
       cerr << message << endl;
       throw(message);
@@ -262,8 +266,8 @@ void MakeDir(const char *dirname) {
   // make directory
   QDir dir;
   if (!dir.mkdir(QString(dirname))) {
-    char *message = new char[MESS_BUF_SIZE+1];
-    snprintf(message,MESS_BUF_SIZE,"%s: Error in making directory %s",strerror(errno),dirname);
+    char* message = new char[MESS_BUF_SIZE + 1];
+    snprintf(message, MESS_BUF_SIZE, "%s: Error in making directory %s", strerror(errno), dirname);
     warning(message);
     //strerror(message);
     //exit(1);
@@ -278,38 +282,41 @@ void MakeDir(const char *dirname) {
   int status;
   char message[MESS_BUF_SIZE];
 
-  status=mkdir(dirname, S_IRWXU); // S_IRWXU: Read, Write, Execute by Owner 
+  status = mkdir(dirname, S_IRWXU); // S_IRWXU: Read, Write, Execute by Owner 
 
-  if (status<0) { // error occurred
+  if (status < 0) { // error occurred
 
     //check for existance
 
-    if (errno==EEXIST) {
+    if (errno == EEXIST) {
 
       // Check whether it is a directory 
       struct stat buf;
       stat(dirname, &buf);
       if (S_ISDIR(buf.st_mode)) {
-	// OK 
-	extern  Parameter par;
-	if (false /* && par.interactive*/) {
-	  fprintf(stderr,"Using existing directory %s for data storage.\n",dirname);
-	  if (!YesNoP("OK?")) {
-	    // User doesn't agree. Exit
-	    exit(1);
-	  }
-	} else {
-	  fprintf(stderr,"Using existing directory %s for data storage.\n",dirname);
-	}
-      } else {
-	snprintf(message, MESS_BUF_SIZE, "%s is not a directory", dirname);
-	perror(message);
-	exit(1);
+        // OK 
+        extern  Parameter par;
+        if (false /* && par.interactive*/) {
+          fprintf(stderr, "Using existing directory %s for data storage.\n", dirname);
+          if (!YesNoP("OK?")) {
+            // User doesn't agree. Exit
+            exit(1);
+          }
+        }
+        else {
+          fprintf(stderr, "Using existing directory %s for data storage.\n", dirname);
+        }
       }
-    } else {
+      else {
+        snprintf(message, MESS_BUF_SIZE, "%s is not a directory", dirname);
+        perror(message);
+        exit(1);
+      }
+    }
+    else {
       // a different error occurred. Print error and quit 
 
-      snprintf(message,MESS_BUF_SIZE,"Error in making directory %s",dirname);
+      snprintf(message, MESS_BUF_SIZE, "Error in making directory %s", dirname);
       perror(message);
       exit(1);
     }
@@ -319,16 +326,17 @@ void MakeDir(const char *dirname) {
 }
 
 
-char* AppendHomeDirIfPathRelative(char *datadir) {
+char* AppendHomeDirIfPathRelative(char* datadir) {
   QDir dataDir(datadir);
-  if (dataDir.isRelative()){
-    if (datadir) { 
-      free(datadir); 
+  if (dataDir.isRelative()) {
+    if (datadir) {
+      free(datadir);
     }
     QStringList path;
     path << QDir::homePath() << dataDir.dirName();
-    return strdup((char *) path.join("/").toStdString().c_str());
-  } else return datadir;
+    return strdup((char*)path.join("/").toStdString().c_str());
+  }
+  else return datadir;
 }
 
 /* finis */

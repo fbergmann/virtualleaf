@@ -32,51 +32,51 @@ static const std::string _module_id("$Id$");
 static int idum = -1;
 using namespace std;
 
-static int counter=0;
+static int counter = 0;
 /*! \return A random double between 0 and 1
 **/
 double RANDOM(void)
 /* Knuth's substrative method, see Numerical Recipes */
 {
-  static int inext,inextp;
+  static int inext, inextp;
   static long ma[56];
-  static int iff=0;
+  static int iff = 0;
   counter++;
-  long mj,mk;
-  int i,ii,k;
+  long mj, mk;
+  int i, ii, k;
 
   if (idum < 0 || iff == 0) {
-    iff=1;
-    mj=MSEED-(idum < 0 ? -idum : idum);
+    iff = 1;
+    mj = MSEED - (idum < 0 ? -idum : idum);
     mj %= MBIG;
-    ma[55]=mj;
-    mk=1;
-    i=1;
+    ma[55] = mj;
+    mk = 1;
+    i = 1;
     do {
-      ii=(21*i) % 55;
-      ma[ii]=mk;
-      mk=mj-mk;
+      ii = (21 * i) % 55;
+      ma[ii] = mk;
+      mk = mj - mk;
       if (mk < MZ) mk += MBIG;
-      mj=ma[ii];
-    } while ( ++i <= 54 );
-    k=1;
+      mj = ma[ii];
+    } while (++i <= 54);
+    k = 1;
     do {
-      i=1;
+      i = 1;
       do {
-        ma[i] -= ma[1+(i+30) % 55];
+        ma[i] -= ma[1 + (i + 30) % 55];
         if (ma[i] < MZ) ma[i] += MBIG;
-      } while ( ++i <= 55 );
-    } while ( ++k <= 4 );
-    inext=0;
-    inextp=31;
-    idum=1;
+      } while (++i <= 55);
+    } while (++k <= 4);
+    inext = 0;
+    inextp = 31;
+    idum = 1;
   }
-  if (++inext == 56) inext=1;
-  if (++inextp == 56) inextp=1;
-  mj=ma[inext]-ma[inextp];
+  if (++inext == 56) inext = 1;
+  if (++inextp == 56) inextp = 1;
+  mj = ma[inext] - ma[inextp];
   if (mj < MZ) mj += MBIG;
-  ma[inext]=mj;
-  return mj*FAC;
+  ma[inext] = mj;
+  return mj * FAC;
 }
 
 /*! \param An integer random seed
@@ -85,15 +85,16 @@ double RANDOM(void)
 int Seed(int seed)
 {
   if (seed < 0) {
-    int rseed=Randomize();
+    int rseed = Randomize();
 #ifdef QDEBUG
     qDebug() << "Randomizing random generator, seed is " << rseed << endl;
 #endif
     return rseed;
-  } else {
+  }
+  else {
     int i;
     idum = -seed;
-    for (i=0; i <100; i++)
+    for (i = 0; i < 100; i++)
       RANDOM();
     return seed;
   }
@@ -106,7 +107,7 @@ int Seed(int seed)
 **/
 long RandomNumber(long max)
 {
-  return((long)(RANDOM()*max+1));
+  return((long)(RANDOM() * max + 1));
 }
 
 /*! Interactively ask for the seed
@@ -117,7 +118,7 @@ void AskSeed(void)
 {
   int seed;
   printf("Please enter a random seed: ");
-  scanf("%d",&seed);
+  scanf("%d", &seed);
   printf("\n");
   Seed(seed);
 }
@@ -139,7 +140,7 @@ int Randomize(void) {
 
   ftime(&t);
 
-  seed=abs((int)((t.time*t.millitm)%655337));
+  seed = abs((int)((t.time * t.millitm) % 655337));
   Seed(seed);
 #ifdef QDEBUG
   qDebug() << "Random seed is " << seed << endl;
