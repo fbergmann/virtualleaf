@@ -24,7 +24,12 @@
 #include <sstream>
 #include <cstring>
 #include <functional> 
+#ifdef _MSC_VER
+#include "win_getopt.h"
+#else
 #include <getopt.h>
+#include <unistd.h>
+#endif
 #include <cerrno>
 #include "mesh.h"
 #include "parameter.h"
@@ -43,7 +48,7 @@
 //Added by qt3to4:
 #include <QMouseEvent>
 
-#include <unistd.h>
+
 #include <q3textstream.h> 
 
 #ifdef HAVE_QWT
