@@ -26,6 +26,7 @@
 #include "node.h"
 //#include "apoplastitem.h"
 #include <algorithm>
+#include <functional>
 #include <QGraphicsScene>
 
 static const std::string _module_id("$Id$");

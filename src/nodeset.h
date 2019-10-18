@@ -29,6 +29,7 @@
 #include <numeric>
 #include <list>
 #include <iterator>
+#include <functional>
 #include "node.h"
 
 class NodeSet : public list<Node *> {
