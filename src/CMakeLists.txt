@@ -87,7 +87,7 @@ add_executable(VirtualLeaf ${EXECUTABLE_FLAGS} ${CPP_FILES}
   ${HEADERS_MOC}
   ${FORMS_HEADERS}
   ${RESOURCES_RCC}
-  ${SPATIAL_CPP_FILES}
+  ${VLEAF_CPP_FILES}
 )
 
 QT_BIND_TO_TARGET(VirtualLeaf)
